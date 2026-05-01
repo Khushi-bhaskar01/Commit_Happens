@@ -33,7 +33,7 @@ export const DIALOGUES: Dialogue[] = [
     id: "d3",
     show: 0.65,
     hide: 0.85,
-    quote: "PRIZE: 20K+ POOL",
+    quote: "PRIZE: 6K POOL",
     speaker: "WORTHY_REWARD",
     film: "SYSTEM_GAMMA",
   },
