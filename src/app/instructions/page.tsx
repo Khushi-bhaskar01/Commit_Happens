@@ -57,10 +57,10 @@ export default function InstructionsPage() {
   return (
     <>
       <Navbar />
-      <main ref={containerRef} className="min-h-screen bg-background pt-32 pb-20 px-6">
-        <div className="mx-auto max-w-6xl grid md:grid-cols-[1fr_1fr] gap-20 items-start">
+      <main ref={containerRef} className="min-h-screen bg-background pt-24 md:pt-32 pb-20 px-6">
+        <div className="mx-auto max-w-6xl grid lg:grid-cols-[1fr_1fr] gap-10 md:gap-20 items-start">
           {/* Sticky Image Frame */}
-          <div className="sticky top-32 hidden md:block aspect-[4/5] rounded-2xl border border-accent/20 overflow-hidden bg-black">
+          <div className="sticky top-32 hidden lg:block aspect-[4/5] rounded-2xl border border-accent/20 overflow-hidden bg-black">
             {INSTRUCTIONS.map((step, i) => (
               <img
                 key={i}
@@ -99,7 +99,11 @@ export default function InstructionsPage() {
               <div className="grid gap-20 mt-12">
                 {INSTRUCTIONS.map((step, i) => (
                   <AnimatedItem key={i} className={`step-${i}`}>
-                    <div className="relative overflow-hidden card-surface p-8 group min-h-[300px] flex flex-col justify-center">
+                    <div className="relative overflow-hidden card-surface p-6 md:p-8 group min-h-[auto] md:min-h-[300px] flex flex-col justify-center">
+                      {/* Mobile Image */}
+                      <div className="mb-6 block lg:hidden aspect-video rounded-lg border border-white/10 overflow-hidden">
+                        <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
+                      </div>
                       <div className="absolute top-0 right-0 p-4">
                         <span className="font-mono text-[10px] tracking-[0.2em] text-accent-alt font-bold">
                           {step.status}
@@ -123,9 +127,9 @@ export default function InstructionsPage() {
               </div>
 
               <AnimatedItem>
-                <div className="card-surface p-8 border-accent-toxic/20 bg-accent-toxic/[0.02] mt-10">
+                <div className="card-surface p-6 md:p-8 border-accent-toxic/20 bg-accent-toxic/[0.02] mt-10">
                   <h4 className="font-display text-xl text-accent-toxic mb-4">Evaluation Metrics</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 font-mono text-[11px] uppercase tracking-widest text-zinc-500">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 font-mono text-[11px] uppercase tracking-widest text-zinc-500">
                     <div className="flex flex-col gap-2">
                       <span className="text-foreground">Innovation</span>
                       <span>30%</span>

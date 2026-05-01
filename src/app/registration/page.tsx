@@ -35,7 +35,7 @@ export default function RegistrationPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background pt-32 pb-20 px-6 relative overflow-hidden">
+      <main className="min-h-screen bg-background pt-24 md:pt-32 pb-20 px-4 md:px-6 relative overflow-hidden">
         {/* Aesthetic Background Elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(8,191,124,0.1),transparent_70%)]" />
@@ -50,8 +50,8 @@ export default function RegistrationPage() {
                 <EyebrowBadge>PROTOCOL // REGISTRATION // LIVE</EyebrowBadge>
               </AnimatedItem>
 
-              <AnimatedItem className="mt-8">
-                <h1 className="font-display text-4xl font-bold tracking-tighter text-foreground md:text-6xl uppercase italic">
+              <AnimatedItem className="mt-6 md:mt-8">
+                <h1 className="font-display text-3xl font-bold tracking-tighter text-foreground md:text-6xl uppercase italic">
                   Assemble Your <span className="text-accent">Unit.</span>
                 </h1>
                 <p className="mt-6 max-w-2xl mx-auto font-sans text-lg leading-relaxed text-zinc-400">
@@ -64,8 +64,8 @@ export default function RegistrationPage() {
             <AnimatedItem className="w-full mt-12">
               <form className="grid gap-10" onSubmit={(e) => e.preventDefault()}>
                 {/* Team Info Section */}
-                <div className="card-surface p-1 shadow-[0_0_50px_rgba(8,191,124,0.05)]">
-                  <div className="bg-background/80 backdrop-blur-xl rounded-[19px] p-8 border border-white/5">
+                <div className="card-surface p-0.5 shadow-[0_0_50px_rgba(8,191,124,0.05)]">
+                  <div className="bg-background/80 backdrop-blur-xl rounded-[19px] p-5 md:p-8 border border-white/5">
                     <div className="flex items-center gap-3 mb-8">
                       <div className="w-8 h-8 rounded bg-accent/10 flex items-center justify-center text-accent">
                         <Users size={20} weight="bold" />
@@ -97,7 +97,7 @@ export default function RegistrationPage() {
                     <h2 className="font-mono text-xs font-bold uppercase tracking-[0.4em] text-zinc-500">Command & Control</h2>
                   </div>
 
-                  <div className="card-surface p-8 border-accent/20 bg-accent/[0.02]">
+                  <div className="card-surface p-5 md:p-8 border-accent/20 bg-accent/[0.02]">
                     <div className="flex items-center gap-3 mb-6">
                       <IdentificationBadge size={20} className="text-accent" weight="bold" />
                       <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent">Team Lead (Primary Operative)</span>
@@ -144,7 +144,7 @@ export default function RegistrationPage() {
 
                   <div className="grid gap-6">
                     {members.map((member, index) => (
-                      <div key={index} className="group relative card-surface p-8 border-white/5 bg-white/[0.01] hover:border-white/10 transition-all">
+                      <div key={index} className="group relative card-surface p-5 md:p-8 border-white/5 bg-white/[0.01] hover:border-white/10 transition-all">
                         <div className="flex justify-between items-center mb-6">
                           <div className="flex items-center gap-3">
                             <User size={16} className="text-zinc-500" />

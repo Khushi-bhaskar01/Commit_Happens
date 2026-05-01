@@ -28,27 +28,25 @@ export function Hero() {
     let loadedCount = 0;
     const imgs: HTMLImageElement[] = [];
 
+    const onImageLoad = () => {
+      if (cancelled) return;
+      loadedCount++;
+      setLoadProgress(loadedCount / FRAME_COUNT);
+      if (loadedCount === FRAME_COUNT) {
+        loadedRef.current = true;
+        setLoaded(true);
+      }
+    };
+
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const img = new Image();
       img.src = framePath(i);
-      img.onload = () => {
-        if (cancelled) return;
-        loadedCount++;
-        setLoadProgress(loadedCount / FRAME_COUNT);
-        if (loadedCount === FRAME_COUNT) {
-          loadedRef.current = true;
-          setLoaded(true);
-        }
-      };
-      img.onerror = () => {
-        if (cancelled) return;
-        loadedCount++;
-        setLoadProgress(loadedCount / FRAME_COUNT);
-        if (loadedCount === FRAME_COUNT) {
-          loadedRef.current = true;
-          setLoaded(true);
-        }
-      };
+      if (img.complete) {
+        onImageLoad();
+      } else {
+        img.onload = onImageLoad;
+        img.onerror = onImageLoad;
+      }
       imgs.push(img);
     }
     framesRef.current = imgs;
@@ -60,8 +58,9 @@ export function Hero() {
 
   const drawFrame = useCallback((index: number) => {
     const canvas = canvasRef.current;
+    if (!canvas || !framesRef.current[index]) return;
     const img = framesRef.current[index];
-    if (!canvas || !img || !img.complete || !img.naturalWidth) return;
+    if (!img.complete || !img.naturalWidth) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -118,6 +117,8 @@ export function Hero() {
   }, [loaded, drawFrame]);
 
   useEffect(() => {
+    if (!loaded) return;
+
     const handleScroll = () => {
       if (tickingRef.current) return;
       tickingRef.current = true;
@@ -179,7 +180,7 @@ export function Hero() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [drawFrame]);
+  }, [loaded, drawFrame]);
 
   return (
     <section ref={sectionRef} className="scroll-animation relative">
