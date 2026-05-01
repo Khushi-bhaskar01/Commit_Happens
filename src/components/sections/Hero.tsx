@@ -1,0 +1,320 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { EyebrowBadge } from "@/components/ui/EyebrowBadge";
+import { HudFrame } from "@/components/ui/HudFrame";
+import { DIALOGUES, FRAME_COUNT, HERO_TEXT_FADE_END, framePath } from "@/lib/hero";
+
+export function Hero() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const heroTextRef = useRef<HTMLDivElement | null>(null);
+  const bigLeftTextRef = useRef<HTMLDivElement | null>(null);
+  const progressFillRef = useRef<HTMLDivElement | null>(null);
+  const powerReadoutRef = useRef<HTMLSpanElement | null>(null);
+
+  const framesRef = useRef<HTMLImageElement[]>([]);
+  const tickingRef = useRef(false);
+  const loadedRef = useRef(false);
+  const lastFrameRef = useRef(-1);
+  const prevVisibleIdsRef = useRef("");
+
+  const [loadProgress, setLoadProgress] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    let cancelled = false;
+    let loadedCount = 0;
+    const imgs: HTMLImageElement[] = [];
+
+    for (let i = 1; i <= FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = framePath(i);
+      img.onload = () => {
+        if (cancelled) return;
+        loadedCount++;
+        setLoadProgress(loadedCount / FRAME_COUNT);
+        if (loadedCount === FRAME_COUNT) {
+          loadedRef.current = true;
+          setLoaded(true);
+        }
+      };
+      img.onerror = () => {
+        if (cancelled) return;
+        loadedCount++;
+        setLoadProgress(loadedCount / FRAME_COUNT);
+        if (loadedCount === FRAME_COUNT) {
+          loadedRef.current = true;
+          setLoaded(true);
+        }
+      };
+      imgs.push(img);
+    }
+    framesRef.current = imgs;
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const drawFrame = useCallback((index: number) => {
+    const canvas = canvasRef.current;
+    const img = framesRef.current[index];
+    if (!canvas || !img || !img.complete || !img.naturalWidth) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const cw = canvas.width;
+    const ch = canvas.height;
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const canvasRatio = cw / ch;
+
+    let drawW: number;
+    let drawH: number;
+    if (canvasRatio > imgRatio) {
+      drawW = cw;
+      drawH = cw / imgRatio;
+    } else {
+      drawH = ch;
+      drawW = ch * imgRatio;
+    }
+
+    if (window.innerWidth <= 768) {
+      drawW *= 1.3;
+      drawH *= 1.3;
+    }
+
+    const drawX = (cw - drawW) / 2;
+    const drawY = (ch - drawH) / 2;
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+  }, []);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.scale(1, 1);
+    drawFrame(lastFrameRef.current >= 0 ? lastFrameRef.current : 0);
+  }, [drawFrame]);
+
+  useEffect(() => {
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [resizeCanvas]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    drawFrame(0);
+    lastFrameRef.current = 0;
+  }, [loaded, drawFrame]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+
+      requestAnimationFrame(() => {
+        tickingRef.current = false;
+        const section = sectionRef.current;
+        if (!section || !loadedRef.current) return;
+
+        const rect = section.getBoundingClientRect();
+        const scrollable = section.offsetHeight - window.innerHeight;
+        const progress =
+          scrollable <= 0
+            ? 0
+            : Math.min(1, Math.max(0, -rect.top / scrollable));
+
+        const frameIndex = Math.min(
+          FRAME_COUNT - 1,
+          Math.floor(progress * FRAME_COUNT),
+        );
+        if (frameIndex !== lastFrameRef.current) {
+          lastFrameRef.current = frameIndex;
+          drawFrame(frameIndex);
+        }
+
+        if (heroTextRef.current) {
+          const opacity = Math.max(0, 1 - progress / HERO_TEXT_FADE_END);
+          heroTextRef.current.style.opacity = String(opacity);
+          heroTextRef.current.style.transform = `translateY(${(1 - opacity) * 12}px)`;
+        }
+
+        if (bigLeftTextRef.current) {
+          const op = Math.min(1, Math.max(0, (progress - 0.1) / 0.08));
+          bigLeftTextRef.current.style.opacity = String(op);
+          bigLeftTextRef.current.style.transform = `translateY(${(1 - op) * 14}px)`;
+        }
+
+        if (progressFillRef.current) {
+          progressFillRef.current.style.transform = `scaleX(${progress})`;
+        }
+
+        if (powerReadoutRef.current) {
+          const pwr = 87.3 + Math.sin(progress * Math.PI * 2) * 6.7;
+          powerReadoutRef.current.textContent = pwr.toFixed(1) + "%";
+        }
+
+        const newVisible = new Set<string>();
+        for (const d of DIALOGUES) {
+          if (progress >= d.show && progress <= d.hide) newVisible.add(d.id);
+        }
+        const newIds = [...newVisible].sort().join(",");
+        if (newIds !== prevVisibleIdsRef.current) {
+          prevVisibleIdsRef.current = newIds;
+          setVisibleCards(newVisible);
+        }
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [drawFrame]);
+
+  return (
+    <section ref={sectionRef} className="scroll-animation relative">
+      <div
+        className="sticky top-0 min-h-[100dvh] w-full overflow-hidden bg-background"
+        style={{ height: "100dvh", willChange: "transform", transform: "translateZ(0)" }}
+      >
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 h-full w-full doomsday-filter"
+          style={{ willChange: "contents", transform: "translateZ(0)" }}
+        />
+
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(120% 80% at 50% 10%, transparent 30%, rgba(10,10,11,0.45) 70%, rgba(10,10,11,0.85) 100%)",
+          }}
+        />
+
+        <div className="pointer-events-none absolute left-6 top-24 text-accent md:left-10 md:top-28">
+          <HudFrame corner="tl" size={26} />
+        </div>
+        <div className="pointer-events-none absolute right-6 top-24 text-accent md:right-10 md:top-28">
+          <HudFrame corner="tr" size={26} />
+        </div>
+        <div className="pointer-events-none absolute bottom-14 left-6 text-accent md:bottom-16 md:left-10">
+          <HudFrame corner="bl" size={26} />
+        </div>
+        <div className="pointer-events-none absolute bottom-14 right-6 text-accent md:bottom-16 md:right-10">
+          <HudFrame corner="br" size={26} />
+        </div>
+
+        <div
+          ref={heroTextRef}
+          className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-start gap-5 px-6 pb-24 md:px-12 md:pb-28"
+          style={{ transition: "opacity 80ms linear" }}
+        >
+          <EyebrowBadge>PROTOCOL // 16 MAY 2026 // 09:00 - 21:00</EyebrowBadge>
+          <h1 className="max-w-[14ch] font-display text-4xl font-black leading-[0.85] tracking-tighter text-foreground md:text-7xl lg:text-8xl ">
+            Commit
+            <br />
+            <span className="text-accent drop-shadow-[0_0_15px_rgba(8,191,124,0.4)]">Happens.</span>
+          </h1>
+          <div className="flex flex-col gap-2">
+            <p className="max-w-[42ch] font-sans text-sm font-medium leading-relaxed text-zinc-300 md:text-base">
+              A 12-hour high-intensity hack sprint. The terminal is your only witness.
+            </p>
+            <div className="flex items-center gap-4">
+               <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-accent-alt font-bold">Prize Pool 6K</span>
+               <div className="h-1 w-1 rounded-full bg-zinc-600" />
+               <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-zinc-500">16.MAY.2026</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="pointer-events-none absolute left-6 top-20 z-10 flex items-center gap-2 md:left-10 md:top-24">
+          <div className="h-px w-8 bg-accent/60" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-zinc-400">
+            Telemetry Link &mdash; Live
+          </span>
+        </div>
+
+        <div className="pointer-events-none absolute right-6 top-20 z-10 flex items-center gap-3 md:right-10 md:top-24">
+          <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-zinc-400">
+            Sprint Clock
+          </span>
+          <span
+            ref={powerReadoutRef}
+            className="font-mono text-[10px] uppercase tracking-[0.22em] text-accent-alt"
+          >
+            12:00:00
+          </span>
+          <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-accent-alt shadow-[0_0_10px_rgba(239,68,68,0.85)]" />
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10">
+          <div className="mx-6 mb-3 h-px bg-white/10 md:mx-10">
+            <div
+              ref={progressFillRef}
+              className="h-full origin-left bg-accent"
+              style={{ transform: "scaleX(0)", transition: "transform 80ms linear" }}
+            />
+          </div>
+          <div className="mx-6 flex items-center justify-between pb-4 font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500 md:mx-10">
+            <span>SEQ 001 / 169</span>
+            <span>CENTRAL AI // SURVEILLANCE</span>
+            <span>Scroll &darr;</span>
+          </div>
+        </div>
+
+        {DIALOGUES.map((d) => {
+          const visible = visibleCards.has(d.id);
+          return (
+            <div
+              key={d.id}
+              className={`pointer-events-none absolute left-6 top-1/2 z-20 -translate-y-1/2 md:left-12`}
+            >
+              <div
+                className={`flex flex-col gap-3 transition-all duration-500 ease-out ${
+                  visible 
+                    ? "translate-x-0 opacity-100 blur-0" 
+                    : "-translate-x-4 opacity-0 blur-sm"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-px w-6 bg-accent" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-accent">
+                    {d.speaker}
+                  </span>
+                </div>
+                <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-4xl lg:text-5xl uppercase">
+                  {d.quote}
+                </h3>
+              </div>
+            </div>
+          );
+        })}
+
+        {!loaded && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5 bg-background px-6">
+            <EyebrowBadge>SUIT UP PROTOCOL // BOOTING</EyebrowBadge>
+            <div className="h-px w-60 bg-white/10 md:w-80">
+              <div
+                className="h-full bg-accent transition-[width] duration-150 ease-out"
+                style={{ width: `${Math.round(loadProgress * 100)}%` }}
+              />
+            </div>
+            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-zinc-500">
+              Loading Mark LXXXV &nbsp;&middot;&nbsp; {Math.round(loadProgress * 100)}%
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

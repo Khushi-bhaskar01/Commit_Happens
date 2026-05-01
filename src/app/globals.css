@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+:root {
+  --background: #070508;
+  --foreground: #f8fafc;
+  --muted: #9fa9b2;
+  --accent: #08bf7c; /* Emerald */
+  --accent-alt: #c78f22; /* Gold */
+  --accent-toxic: #ffec83; /* Yellow */
+  --accent-forest: #00643d; /* Forest */
+  --accent-iron: #e23636; /* Iron Man Red */
+  --accent-soft: rgba(8, 191, 124, 0.15);
+  --card-bg: rgba(7, 5, 8, 0.9);
+  --card-border: rgba(8, 191, 124, 0.2);
+  --hud-line: rgba(226, 54, 54, 0.15); /* Red HUD lines */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-alt: var(--accent-alt);
+  --color-accent-toxic: var(--accent-toxic);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-syne);
+  --font-mono: var(--font-mono);
+  --font-display: var(--font-neo);
+}
+
+html,
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-chakra), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+}
+
+.card-surface {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+.scroll-animation {
+  height: 400vh;
+}
+
+@media (max-width: 1024px) {
+  .scroll-animation {
+    height: 350vh;
+  }
+}
+
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    rgba(226, 54, 54, 0.05) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+@media (max-width: 768px) {
+  .scroll-animation {
+    height: 300vh;
+  }
+}
+
+.hud-tick {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0 calc(100% - 1px),
+    var(--hud-line) calc(100% - 1px) 100%
+  );
+  background-size: 16px 100%;
+}
+
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -100%;
+  z-index: 100;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.04;
+  pointer-events: none;
+  animation: noise 0.2s infinite;
+}
+
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 49;
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.1) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.02),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.02)
+  );
+  background-size: 100% 3px, 3px 100%;
+  opacity: 0.15;
+}
+
+.doomsday-filter {
+  filter: grayscale(0.4) contrast(1.2) brightness(0.9) sepia(0.2) hue-rotate(-15deg);
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.animate-glitch {
+  animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+  animation-play-state: paused;
+}
+
+.animate-glitch:hover {
+  animation-play-state: running;
+}
+
+.hazard-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--accent),
+    var(--accent) 10px,
+    #000 10px,
+    #000 20px
+  );
+}
