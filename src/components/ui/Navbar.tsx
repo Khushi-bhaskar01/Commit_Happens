@@ -33,14 +33,14 @@ export function Navbar() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-[60] transition-[background-color,backdrop-filter,border-color] duration-300 ${
-        scrolled || !isHome
+        (scrolled || !isHome) && !isOpen
           ? "border-b border-white/10 bg-black/60 backdrop-blur-2xl backdrop-saturate-150"
           : "border-b border-transparent bg-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3 md:px-8 md:py-5">
-        <Link href="/" className="flex items-center gap-3 z-50">
-          <span className="font-display text-base sm:text-lg font-black tracking-tighter text-foreground uppercase">
+        <Link href="/" className="flex items-center gap-3 z-50 min-w-0">
+          <span className="font-display text-sm sm:text-base md:text-lg font-black tracking-tighter text-foreground uppercase truncate">
             Commit <span className="text-accent">Happens.</span>
           </span>
         </Link>
@@ -97,9 +97,9 @@ export function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 flex flex-col bg-black/95 backdrop-blur-xl lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col bg-black/98 backdrop-blur-2xl lg:hidden"
           >
-            <nav className="flex flex-col items-center justify-center flex-1 gap-8 p-6">
+            <nav className="flex flex-col items-center justify-center flex-1 gap-8 p-6 pt-24">
               {[
                 { name: "Home", href: "/" },
                 { name: "Instruction", href: "/instructions" },

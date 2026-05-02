@@ -20,7 +20,10 @@ export function SmoothScrollProvider({ children }: Props) {
 
     let rafId = 0;
     const raf = (time: number) => {
-      lenis.raf(time);
+      // Stop Lenis if body overflow is hidden (navbar open)
+      if (document.body.style.overflow !== "hidden") {
+        lenis.raf(time);
+      }
       rafId = requestAnimationFrame(raf);
     };
     rafId = requestAnimationFrame(raf);

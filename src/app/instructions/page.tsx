@@ -57,7 +57,7 @@ export default function InstructionsPage() {
   return (
     <>
       <Navbar />
-      <main ref={containerRef} className="min-h-screen bg-background pt-28 md:pt-32 pb-20 px-6">
+      <main ref={containerRef} className="min-h-screen bg-background pt-32 pb-20 px-6">
         <div className="mx-auto max-w-6xl grid lg:grid-cols-[1fr_1fr] gap-10 md:gap-20 items-start">
           {/* Sticky Image Frame */}
           <div className="sticky top-32 hidden lg:block aspect-[4/5] rounded-2xl border border-accent/20 overflow-hidden bg-black">
