@@ -37,6 +37,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
 body {
   text-rendering: optimizeLegibility;
 }
@@ -64,12 +81,11 @@ body {
 
 .scanlines {
   position: relative;
-  overflow: hidden;
 }
 
 .scanlines::before {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(
     to bottom,

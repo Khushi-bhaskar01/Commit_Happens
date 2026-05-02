@@ -13,7 +13,7 @@ export function SmoothScrollProvider({ children }: Props) {
       lerp: 0.1,
       duration: 1.2,
       smoothWheel: true,
-      syncTouch: false,
+      syncTouch: true,
       touchMultiplier: 1.1,
     });
     lenisRef.current = lenis;
