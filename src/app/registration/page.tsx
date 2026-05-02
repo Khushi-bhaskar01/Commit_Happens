@@ -35,7 +35,7 @@ export default function RegistrationPage() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-background pt-24 md:pt-32 pb-20 px-4 md:px-6 relative">
+      <main className="min-h-screen bg-background pt-28 md:pt-32 pb-20 px-4 md:px-6 relative">
         {/* Aesthetic Background Elements */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,rgba(8,191,124,0.1),transparent_70%)]" />
