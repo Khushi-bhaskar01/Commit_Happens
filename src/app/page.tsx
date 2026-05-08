@@ -6,6 +6,7 @@ import { Navbar } from "@/components/ui/Navbar";
 import { Hero } from "@/components/sections/Hero";
 import { CinematicReveal } from "@/components/sections/CinematicReveal";
 import { SystemsNominal } from "@/components/sections/SystemsNominal";
+import { OrganizedBy } from "@/components/sections/OrganizedBy";
 import { Footer } from "@/components/sections/Footer";
 import { LoadingIntro } from "@/components/ui/LoadingIntro";
 
@@ -41,6 +42,7 @@ export default function Home() {
           <CinematicReveal />
           <SystemsNominal />
         </main>
+        <OrganizedBy />
         <Footer />
       </div>
     </>

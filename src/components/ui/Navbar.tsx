@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ArrowUpRight, List, X } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
@@ -40,6 +41,13 @@ export function Navbar() {
     >
       <div className="mx-auto flex max-w-[1400px] items-center justify-between px-5 py-3 md:px-8 md:py-5">
         <Link href="/" className="flex items-center gap-3 z-50 min-w-0">
+          <Image 
+            src="/logo.ico" 
+            alt="Commit Happens Logo" 
+            width={32} 
+            height={32} 
+            className="h-8 w-8 md:h-10 md:w-10 brightness-200 hover:brightness-300 transition-all"
+          />
           <span className="font-display text-sm sm:text-base md:text-lg font-black tracking-tighter text-foreground uppercase truncate">
             Commit <span className="text-accent">Happens.</span>
           </span>

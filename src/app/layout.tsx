@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description:
     "An online hack sprint designed to challenge developers in a fast-paced, time-bound environment. Ideate, design, and build in 12 hours.",
   metadataBase: new URL("http://localhost:3000"),
+  icons: {
+    icon: "/logo.ico",
+  },
 };
 
 export default function RootLayout({
