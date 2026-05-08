@@ -25,7 +25,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-2 border-t border-white/5 pt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500 md:flex-row md:items-center md:justify-between">
-          <span>Build 2026.05.01 &nbsp;&middot;&nbsp; Protocol Alpha &nbsp;&middot;&nbsp; Central DEVSOURCE Online</span>
+          <span>&nbsp;&middot;&nbsp; Protocol Alpha &nbsp;&middot;&nbsp; Central DEVSOURCE Online</span>
           <span>Online hack sprint &mdash; no rounds, no interruptions</span>
         </div>
       </div>
