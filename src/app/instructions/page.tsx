@@ -13,7 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 const INSTRUCTIONS = [
   {
     title: "Phase 01: The Drop",
-    content: "At exactly 09:00 AM, problem statements will be broadcasted to all terminals. You must choose one and initialize your repository immediately.",
+    content: "At exactly 09:00 AM, problem statements will be broadcasted to all terminals. You must choose one and initialize your team work.",
     status: "CRITICAL",
     image: "/doom_character.png"
   },

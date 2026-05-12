@@ -3,97 +3,159 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const STEPS = [
-  { text: "STARK_ARCHIVES_COMPROMISED...", color: "var(--accent-alt)" },
-  { text: "UPLOADING DOOMSDAY PROTOCOLS...", color: "var(--accent)" },
-  { text: "TIMESTAMP: 16 MAY 2026 // 09:00", color: "var(--accent-toxic)" },
-  { text: "NEW LEADERSHIP DETECTED: VICTOR", color: "var(--accent)" },
-  { text: "EVENT: COMMIT HAPPENS // THE RECKONING", color: "var(--foreground)" },
-  { text: "THE MASK IS FINAL. INITIALIZING.", color: "var(--accent-toxic)" },
-];
+const TOTAL_FRAMES = 169;
+const FRAME_RATE = 24;
+
+const TITLE_CHARS_1 = "COMMIT".split("");
+const TITLE_CHARS_2 = "HAPPENS".split("");
 
 export function LoadingIntro({ onComplete }: { onComplete: () => void }) {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [frameIndex, setFrameIndex] = useState(1);
+  const [showTitle, setShowTitle] = useState(false);
 
   useEffect(() => {
-    if (currentStep < STEPS.length) {
-      const timer = setTimeout(() => {
-        setCurrentStep((s) => s + 1);
-      }, 2500); // Increased for readability and impact
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(onComplete, 1500);
+    const interval = setInterval(() => {
+      setFrameIndex((prev) => {
+        if (prev >= TOTAL_FRAMES) {
+          clearInterval(interval);
+          setTimeout(() => setShowTitle(true), 80);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 1000 / FRAME_RATE);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (showTitle) {
+      // Show title for 2.8s then fade the whole screen out
+      const timer = setTimeout(() => onComplete(), 2800);
       return () => clearTimeout(timer);
     }
-  }, [currentStep, onComplete]);
+  }, [showTitle, onComplete]);
+
+  // Preload frames
+  useEffect(() => {
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const img = document.createElement("img");
+      img.src = `/frames/frame_${String(i).padStart(4, "0")}.jpg`;
+    }
+  }, []);
 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black font-mono overflow-hidden"
+      exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
+      className="fixed inset-0 z-[100] bg-black overflow-hidden flex items-center justify-center"
     >
-      {/* Cinematic Background */}
-      <motion.div 
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.4 }}
-        transition={{ duration: 5, ease: "linear" }}
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: "url('/doomsday_bg.png')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          filter: "grayscale(0.6) contrast(1.4) brightness(0.7) sepia(0.1) hue-rotate(90deg) blur(2px)"
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-md px-10">
-        <AnimatePresence mode="wait">
+      {/* --- Frame sequence --- */}
+      <AnimatePresence>
+        {!showTitle && (
           <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: -20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, x: 20, filter: "blur(10px)" }}
-            className="flex flex-col gap-4"
+            key="frames"
+            className="absolute inset-0"
+            exit={{ opacity: 0, transition: { duration: 0.3 } }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent-alt" />
-                <span className="text-[10px] tracking-[0.4em] text-muted">
-                  UPLOADING_PROTOCOL_{String(currentStep).padStart(3, "0")}
-                </span>
-              </div>
-              <span className="text-[8px] text-muted font-bold">16.MAY.2026</span>
-            </div>
-            
-            <p 
-              className="font-display text-xl font-bold leading-tight tracking-tight md:text-2xl"
-              style={{ color: STEPS[currentStep]?.color || "var(--foreground)" }}
-            >
-              {STEPS[currentStep]?.text}
-            </p>
-
-            <div className="mt-6 h-0.5 w-full bg-white/5 relative overflow-hidden">
-              <motion.div 
-                className="h-full bg-accent shadow-[0_0_15px_var(--accent)]"
-                initial={{ width: "0%" }}
-                animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
-              />
-            </div>
+            <motion.div
+              className="w-full h-full bg-center bg-cover"
+              animate={{
+                x: [0, -1.5, 1.5, -1, 1, 0],
+                y: [0, 1, -1, 1.5, -1.5, 0],
+              }}
+              transition={{ duration: 0.08, repeat: Infinity }}
+              style={{
+                backgroundImage: `url('/frames/frame_${String(frameIndex).padStart(4, "0")}.jpg')`,
+                filter: "contrast(1.25) brightness(0.75)",
+              }}
+            />
+            {/* vignette */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,black_100%)] opacity-75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+            {/* scanlines */}
+            <div className="absolute inset-0 pointer-events-none opacity-[0.15] bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.4)_2px,rgba(0,0,0,0.4)_4px)]" />
           </motion.div>
-        </AnimatePresence>
-      </div>
+        )}
+      </AnimatePresence>
 
-      <div className="absolute top-10 left-10 flex flex-col gap-1">
-        <span className="text-[8px] tracking-[0.5em] text-accent uppercase font-bold">Terminal Connection: Encrypted</span>
-        <span className="text-[8px] tracking-[0.5em] text-muted uppercase">Sector 7 // Command Center</span>
-      </div>
+      {/* --- Title reveal --- */}
+      <AnimatePresence>
+        {showTitle && (
+          <motion.div
+            key="title"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+            className="relative z-10 flex flex-col items-center select-none"
+          >
+            {/* Top label */}
+            <motion.p
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="font-mono text-[10px] tracking-[0.6em] text-white/30 uppercase mb-6"
+            >
+              ACM · DevSource Present
+            </motion.p>
 
-      {/* Glitch Overlay */}
-      <div className="pointer-events-none absolute inset-0 opacity-30 mix-blend-overlay">
-          <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%),linear-gradient(90deg,rgba(139,92,246,0.1),rgba(239,68,68,0.1),rgba(74,222,128,0.1))] bg-[length:100%_4px,4px_100%]" />
-      </div>
+            {/* COMMIT — stagger per character */}
+            <div className="flex overflow-hidden">
+              {TITLE_CHARS_1.map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{
+                    delay: 0.15 + i * 0.06,
+                    duration: 0.45,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="font-display text-[clamp(3rem,12vw,8rem)] font-black tracking-[-0.04em] text-white uppercase italic leading-none"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Accent divider line */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.55, duration: 0.6, ease: "easeOut" }}
+              className="w-full h-[3px] bg-accent origin-left my-2"
+            />
+
+            {/* HAPPENS — stagger per character */}
+            <div className="flex overflow-hidden">
+              {TITLE_CHARS_2.map((char, i) => (
+                <motion.span
+                  key={i}
+                  initial={{ y: "100%", opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{
+                    delay: 0.35 + i * 0.06,
+                    duration: 0.45,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="font-display text-[clamp(3rem,12vw,8rem)] font-black tracking-[-0.04em] text-accent uppercase italic leading-none"
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+
+            {/* Tagline */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.4, duration: 0.8 }}
+              className="font-mono text-[11px] tracking-[0.45em] text-white/35 uppercase mt-8"
+            >
+              The Reckoning · 16 May 2026
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
